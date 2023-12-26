@@ -101,7 +101,8 @@ void Main_menu()
     printf("3. Deposit money\n");
     printf("4. Withdraw money\n");
     printf("5. Send money\n");
-    printf("6. Exit\n");
+    printf("6. Exit");
+    printf("\n");
     printf("--------------------------------\n");
     
 }
