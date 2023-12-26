@@ -5,6 +5,7 @@
 #include<string.h>
 #include<stdbool.h>
 #include <direct.h>
+#include <sys/stat.h>
 
 struct accounts
 {
@@ -33,7 +34,9 @@ int main()
 {
     srand(time(NULL));
     int choice;
-    system("mkdir user_story");
+    struct stat st = {0};
+    if (stat("user_story", &st) == -1)
+        system("mkdir user_story");
     while (true)
     {
         Main_menu();
@@ -288,7 +291,7 @@ void Send_money(int index_of_customer)
 
 void Create_Account_Activities(char Account_number_of_customer[10])
 {
-    char path[110]= "C:\\Users\\User\\OneDrive\\Desktop\\projelerim(Denemeler)\\C\\Bank_Management_System\\user_story\\";
+    char path[150]= "C:\\Users\\User\\OneDrive\\Desktop\\projelerim(Denemeler)\\Bank_management_system\\C\\Bank_Management_System\\user_story\\";
     strcat(path,Account_number_of_customer);
     
     FILE *pFile = fopen(path,"w");
@@ -300,12 +303,12 @@ void Create_Account_Activities(char Account_number_of_customer[10])
 }
 
 char* Find_account_activities(const char Account_number_of_customer[10]) {
-    char* The_file = malloc(100);
+    char* The_file = malloc(150);
 
     if (The_file == NULL)
         printf("Error");
 
-    strcpy(The_file, "C:\\Users\\User\\OneDrive\\Desktop\\projelerim(Denemeler)\\C\\Bank_Management_System\\user_story\\");
+    strcpy(The_file, "C:\\Users\\User\\OneDrive\\Desktop\\projelerim(Denemeler)\\Bank_management_system\\C\\Bank_Management_System\\user_story\\");
     strcat(The_file, Account_number_of_customer);
 
     return The_file;
