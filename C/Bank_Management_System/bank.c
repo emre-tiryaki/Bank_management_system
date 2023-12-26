@@ -162,15 +162,10 @@ void Show_account()
 
 int search_account(int index)
 {
-    static int i = 0;
-    if (i<= number_of_accounts)
+    for (int i = 0; i < number_of_accounts; i++)
     {
         if (index == all_accounts[i].account_number)
-            return i;
-        else
         {
-            i++;
-            search_account(index);
             return i;
         }
     }
@@ -279,7 +274,7 @@ void Send_money(int index_of_customer)
         if (pFile == NULL)
             printf("This transaction was not recorded in account transactions\n");
         else
-            fprintf(pFile,"%d person sent you $%d\n",index_of_customer,Sending_money);
+            fprintf(pFile,"%d person sent you $%d\n",all_accounts[index_of_customer].account_number,Sending_money);
         fclose(pFile);
     }
     else
