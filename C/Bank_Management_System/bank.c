@@ -36,7 +36,7 @@ int main()
     int choice;
     struct stat st = {0};
     if (stat("user_story", &st) == -1)
-        system("mkdir user_story");
+        system("mkdir account_activities");
     while (true)
     {
         Main_menu();
@@ -190,7 +190,7 @@ void Deposit_money(int index_of_customer)
             printf("This transaction was not recorded in account transactions\n");
         else
         {
-            fprintf(pF,"$%d money has been deposited into the account\n",depositing_money);
+            fprintf(pF,"$%d has been deposited into the account\n",depositing_money);
         }
         fclose(pF);
     }
@@ -222,7 +222,7 @@ void Withdraw_money(int index_of_customer)
             printf("This transaction was not recorded in account transactions\n");
         else
         {
-            fprintf(pF,"$%d money was withdrawn from the account\n",Withdrawing_money);
+            fprintf(pF,"$%d was withdrawn from the account\n",Withdrawing_money);
         }
         fclose(pF);
     }
@@ -266,7 +266,7 @@ void Send_money(int index_of_customer)
         if (pFile == NULL)
             printf("This transaction was not recorded in account transactions\n");
         else
-            fprintf(pFile,"$%d money transferred to %d person\n",Sending_money,person);
+            fprintf(pFile,"$%d transferred to %d person\n",Sending_money,person);
         fclose(pFile);
 
         char *The_file2 = Find_account_activities(all_accounts[person_index].C_account_number);
@@ -274,7 +274,7 @@ void Send_money(int index_of_customer)
         if (pFile == NULL)
             printf("This transaction was not recorded in account transactions\n");
         else
-            fprintf(pFile,"%d person sent you $%d\n",all_accounts[index_of_customer].account_number,Sending_money);
+            fprintf(pFile,"%d sent you $%d\n",all_accounts[index_of_customer].account_number,Sending_money);
         fclose(pFile);
     }
     else
@@ -286,7 +286,7 @@ void Send_money(int index_of_customer)
 
 void Create_Account_Activities(int Account_number_of_customer)
 {
-    char path[150]= "C:\\Users\\User\\OneDrive\\Desktop\\projelerim(Denemeler)\\Bank_management_system\\C\\Bank_Management_System\\user_story\\";
+    char path[150]= "account_activities\\";
     strcat(path,all_accounts[Account_number_of_customer].C_account_number);
     
     FILE *pFile = fopen(path,"w");
@@ -303,7 +303,7 @@ char* Find_account_activities(const char Account_number_of_customer[10]) {
     if (The_file == NULL)
         printf("Error");
 
-    strcpy(The_file, "C:\\Users\\User\\OneDrive\\Desktop\\projelerim(Denemeler)\\Bank_management_system\\C\\Bank_Management_System\\user_story\\");
+    strcpy(The_file, "account_activities\\");
     strcat(The_file, Account_number_of_customer);
 
     return The_file;
