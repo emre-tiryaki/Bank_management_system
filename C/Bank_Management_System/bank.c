@@ -124,7 +124,7 @@ void Create_account()
     number_of_accounts++;
     char select;
     all_accounts[number_of_accounts-1].money = 0;
-    Create_Account_Activities(all_accounts[number_of_accounts-1].C_account_number);
+    Create_Account_Activities(number_of_accounts-1);
     printf("You have %d money right now want to deposit some?(Y/N): ",all_accounts[number_of_accounts-1].money);
     getchar();
     scanf("%c",&select);
@@ -284,15 +284,15 @@ void Send_money(int index_of_customer)
     return;
 }
 
-void Create_Account_Activities(char Account_number_of_customer[10])
+void Create_Account_Activities(int Account_number_of_customer)
 {
     char path[150]= "C:\\Users\\User\\OneDrive\\Desktop\\projelerim(Denemeler)\\Bank_management_system\\C\\Bank_Management_System\\user_story\\";
-    strcat(path,Account_number_of_customer);
+    strcat(path,all_accounts[Account_number_of_customer].C_account_number);
     
     FILE *pFile = fopen(path,"w");
     if (pFile == NULL)
         printf("Error\n");
-    fprintf(pFile,"-----------------------\n");
+    fprintf(pFile,"name:%spassword:%d\naccount number:%d\n-----------------------\n",all_accounts[Account_number_of_customer].name,all_accounts[Account_number_of_customer].password,all_accounts[Account_number_of_customer].account_number);
     fclose(pFile);
     return;
 }
