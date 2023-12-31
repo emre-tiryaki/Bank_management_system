@@ -18,6 +18,7 @@ struct accounts
 
 struct accounts all_accounts[100];
 int number_of_accounts = 0;
+int account_numbers[100];
 
 void Account_Activities();
 void Create_account();
@@ -29,6 +30,9 @@ void Withdraw_money();
 void Send_money();
 char* Find_account_activities();
 void Create_Account_Activities();
+void count_account_activities();
+int generate_account_number();
+void update_money();
 
 int main()
 {
@@ -37,6 +41,7 @@ int main()
     struct stat st = {0};
     if (stat("user_story", &st) == -1)
         system("mkdir account_activities");
+    count_account_activities();
     while (true)
     {
         Main_menu();
@@ -80,14 +85,6 @@ int main()
                 break;
             case 6:
                 printf("We hope you come again :)\n");
-                FILE *pF;
-                char *The_file;
-                for (int i = 0; i <= number_of_accounts; i++)
-                {
-                    The_file = Find_account_activities(all_accounts[i].C_account_number);
-                    if (remove(The_file) != 0)
-                        printf("%s could not have been deleted.",The_file);
-                }
                 return 0;
                 break;
             default:
@@ -114,10 +111,12 @@ void Create_account()
     printf("\n\nYour name: ");
     getchar();
     fgets(all_accounts[number_of_accounts].name,30,stdin);
-    //all_accounts[number_of_accounts].name[strlen(all_accounts[number_of_accounts].name)] = '\0';
-    all_accounts[number_of_accounts].account_number = (rand() % 900) + 100;
+    int length = strlen(all_accounts[number_of_accounts].name);
+    if (length > 0 && all_accounts[number_of_accounts].name[length - 1] == '\n')
+        all_accounts[number_of_accounts].name[length - 1] = '\0';
+    all_accounts[number_of_accounts].account_number = generate_account_number(number_of_accounts);
     printf("Your account number is %d dont forget that.\n",all_accounts[number_of_accounts].account_number);
-    sprintf(all_accounts[number_of_accounts].C_account_number,"%d.txt",all_accounts[number_of_accounts].account_number);
+    sprintf(all_accounts[number_of_accounts].C_account_number,"%d",all_accounts[number_of_accounts].account_number);
     printf("Password: ");
     scanf("%d", &all_accounts[number_of_accounts].password);
     printf("Your account has been succesfully created :)\n\n");
@@ -135,7 +134,7 @@ void Create_account()
         scanf("%c",&select);
     }
     if (toupper(select) == 'Y')
-        Deposit_money(number_of_accounts-1);
+        return Deposit_money(number_of_accounts-1);
     return;
 }
 
@@ -151,7 +150,7 @@ void Show_account()
     }
     else
     {
-        printf("\nYour name: %s",all_accounts[index].name);
+        printf("\nYour name: %s\n",all_accounts[index].name);
         printf("Your account number: %d\n",all_accounts[index].account_number);
         printf("Your money: %d\n",all_accounts[index].money);
         printf("\n\n");
@@ -183,9 +182,11 @@ void Deposit_money(int index_of_customer)
     if (all_accounts[index_of_customer].password == pass)
     {
         all_accounts[index_of_customer].money += depositing_money;
+        update_money(all_accounts[index_of_customer].C_account_number,index_of_customer);
         printf("Your money has been deposited :)\n");
         char *The_file = Find_account_activities(all_accounts[index_of_customer].C_account_number);
         FILE *pF = fopen(The_file,"a");
+        printf("\n%s\n",The_file);
         if (pF == NULL)
             printf("This transaction was not recorded in account transactions\n");
         else
@@ -215,15 +216,14 @@ void Withdraw_money(int index_of_customer)
     if (all_accounts[index_of_customer].password == pass)
     {
         all_accounts[index_of_customer].money -= Withdrawing_money;
+        update_money(all_accounts[index_of_customer].C_account_number,index_of_customer);
         printf("Your have been withdrawed some money :)\n");
         char *The_file = Find_account_activities(all_accounts[index_of_customer].C_account_number);
         FILE *pF = fopen(The_file,"a");
         if (pF == NULL)
             printf("This transaction was not recorded in account transactions\n");
         else
-        {
             fprintf(pF,"$%d was withdrawn from the account\n",Withdrawing_money);
-        }
         fclose(pF);
     }
     else
@@ -258,7 +258,9 @@ void Send_money(int index_of_customer)
     if (all_accounts[index_of_customer].password == pass)
     {
         all_accounts[index_of_customer].money -= Sending_money;
+        update_money(all_accounts[index_of_customer].C_account_number,index_of_customer);
         all_accounts[person_index].money += Sending_money;
+        update_money(all_accounts[person_index].C_account_number,person_index);
         printf("You have been succesfully sended money\n");                    
         
         char *The_file1 = Find_account_activities(all_accounts[index_of_customer].C_account_number);
@@ -287,24 +289,60 @@ void Send_money(int index_of_customer)
 void Create_Account_Activities(int Account_number_of_customer)
 {
     char path[150]= "account_activities\\";
-    strcat(path,all_accounts[Account_number_of_customer].C_account_number);
-    
+    sprintf(path,"%s%s.txt",path,all_accounts[Account_number_of_customer].C_account_number);
+    printf("\n%s\n",path);
     FILE *pFile = fopen(path,"w");
     if (pFile == NULL)
         printf("Error\n");
-    fprintf(pFile,"name:%spassword:%d\naccount number:%d\n-----------------------\n",all_accounts[Account_number_of_customer].name,all_accounts[Account_number_of_customer].password,all_accounts[Account_number_of_customer].account_number);
+    fprintf(pFile,"name: %s\npassword: %d\naccount number: %d\nmoney: %d\n-----------------------\n\n",all_accounts[Account_number_of_customer].name,all_accounts[Account_number_of_customer].password,all_accounts[Account_number_of_customer].account_number,all_accounts[Account_number_of_customer].money);
     fclose(pFile);
     return;
 }
 
-char* Find_account_activities(const char Account_number_of_customer[10]) {
-    char* The_file = malloc(150);
+char* Find_account_activities(char Account_number_of_customer[]) 
+{
+    char *The_file1 = malloc(sizeof(char)*100);
+    sprintf(The_file1,"account_activities\\%s.txt",Account_number_of_customer);
+    return The_file1;
+}
 
-    if (The_file == NULL)
-        printf("Error");
+void count_account_activities()
+{
+    FILE *pF;
+    char path[100] = "account_activities\\";
+    char txt[15];
+    for (int i = 100; i < 1000; i++)
+    {
+        sprintf(path,"account_activities\\");
+        sprintf(txt,"%d.txt",i);
+        strcat(path,txt);
+        pF = fopen(path,"r");
+        if (pF != NULL)
+        {
+            fscanf(pF,"name: %s\npassword: %d\naccount number: %d\nmoney: %d",&all_accounts[number_of_accounts].name,&all_accounts[number_of_accounts].password,&all_accounts[number_of_accounts].account_number,&all_accounts[number_of_accounts].money);
+            account_numbers[number_of_accounts] = all_accounts[number_of_accounts].account_number;
+            sprintf(all_accounts[number_of_accounts].C_account_number,"%d",all_accounts[number_of_accounts].account_number);
+            number_of_accounts++;
+            fclose(pF);
+        }
+    }
+}
 
-    strcpy(The_file, "account_activities\\");
-    strcat(The_file, Account_number_of_customer);
+int generate_account_number(int index)
+{
+    int an = (rand() % 900) + 100;
+    for (int i = 0;account_numbers[i] != 0; i++)
+        if (account_numbers[i] == an)
+            return generate_account_number(index);
+    return an;
+}
 
-    return The_file;
+void update_money(char C_index[],int index)
+{
+    FILE *pF;
+    char path[100] = "account_activities\\";
+    sprintf(path,"%s%d.txt",path,all_accounts[index].account_number);
+    pF = fopen(path,"r+");
+    fprintf(pF,"name: %s\npassword: %d\naccount number: %d\nmoney: %d\n-----------------------",all_accounts[index].name,all_accounts[index].password,all_accounts[index].account_number,all_accounts[index].money);
+    fclose(pF);
 }
